@@ -11,7 +11,7 @@ export default function Leaves({ user }) {
   const canManage = user.permissions.some((p) =>
     ["*", "organization.manage"].includes(p),
   );
-  const [tab, setTab] = useState("mine"),
+  const [tab, setTab] = useState(user.isSuperAdmin ? "team" : "mine"),
     [modal, setModal] = useState(null),
     [decision, setDecision] = useState(null),
     [reason, setReason] = useState("");
@@ -27,6 +27,7 @@ export default function Leaves({ user }) {
   const balances = useQuery({
     queryKey: ["leave-balances"],
     queryFn: () => get("/leave-balances/me"),
+    enabled: !user.isSuperAdmin,
   });
   const mutation = useMutation({
     mutationFn: ({ id, action, approve }) =>
@@ -54,14 +55,16 @@ export default function Leaves({ user }) {
               Configure policy
             </button>
           )}
-          <button
-            className="primary"
-            onClick={() => setModal("request")}
-            disabled={!policies.data?.data.length}
-          >
-            <Plus size={17} />
-            Request time off
-          </button>
+          {!user.isSuperAdmin && (
+            <button
+              className="primary"
+              onClick={() => setModal("request")}
+              disabled={!policies.data?.data.length}
+            >
+              <Plus size={17} />
+              Request time off
+            </button>
+          )}
         </div>
       </div>
       <div className="stats leave-stats">
@@ -93,12 +96,14 @@ export default function Leaves({ user }) {
       <section className="panel">
         <div className="directory-head">
           <div className="tabs">
-            <button
-              className={tab === "mine" ? "selected" : ""}
-              onClick={() => setTab("mine")}
-            >
-              My requests
-            </button>
+            {!user.isSuperAdmin && (
+              <button
+                className={tab === "mine" ? "selected" : ""}
+                onClick={() => setTab("mine")}
+              >
+                My requests
+              </button>
+            )}
             {canApprove && (
               <button
                 className={tab === "team" ? "selected" : ""}

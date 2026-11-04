@@ -201,7 +201,7 @@ export default function AttendanceWorkspace({ user }) {
     description:
       "Request accurate times while preserving the original history.",
     endpoint: "/attendance/regularizations",
-    create: "Request a correction",
+    create: user.isSuperAdmin ? undefined : "Request a correction",
     fields: [
       { name: "date", label: "Workday", type: "date" },
       {
@@ -326,9 +326,11 @@ export default function AttendanceWorkspace({ user }) {
       </div>
       {tab === "attendance" && (
         <>
-          <section className="panel attendance-punch">
-            <PunchCard />
-          </section>
+          {!user.isSuperAdmin && (
+            <section className="panel attendance-punch">
+              <PunchCard />
+            </section>
+          )}
           {broad && (
             <div className="attendance-date">
               <label>

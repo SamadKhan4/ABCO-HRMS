@@ -450,6 +450,7 @@ function Shell({ user }) {
               <p>{group.section}</p>
               {group.items
                 .filter((item) => !item[3] || allowed(user, item[3]))
+                .filter((item) => !user.isSuperAdmin || item[0] !== "/profile")
                 .map(([path, label, Icon]) => (
                   <NavLink
                     key={path}
@@ -618,7 +619,16 @@ function Shell({ user }) {
                 />
               ))}
               <Route path="shift-swaps" element={<ShiftSwaps user={user} />} />
-              <Route path="profile" element={<ProfilePage />} />
+              <Route
+                path="profile"
+                element={
+                  user.isSuperAdmin ? (
+                    <Navigate to="/settings" replace />
+                  ) : (
+                    <ProfilePage />
+                  )
+                }
+              />
               <Route path="audit" element={<AuditLogs user={user} />} />
               {[
                 "tasks",
@@ -690,7 +700,11 @@ function Dashboard({ user }) {
   return (
     <>
       <PageHeader
-        eyebrow="YOUR WORKSPACE AT A GLANCE"
+        eyebrow={
+          user.isSuperAdmin
+            ? "SUPER ADMIN · SYSTEM OWNER"
+            : "YOUR WORKSPACE AT A GLANCE"
+        }
         title={`Good ${new Date().getHours() < 12 ? "morning" : "afternoon"}, ${user.name.split(" ")[0]} ☀`}
         description="Here's what's happening with your people today."
       >
@@ -952,15 +966,34 @@ function Dashboard({ user }) {
         <section className="panel today-panel">
           <div className="panel-title">
             <div>
-              <h2>My workday</h2>
-              <p>A good day starts with a check-in.</p>
+              <h2>
+                {user.isSuperAdmin ? "System owner controls" : "My workday"}
+              </h2>
+              <p>
+                {user.isSuperAdmin
+                  ? "Full control across your organization."
+                  : "A good day starts with a check-in."}
+              </p>
             </div>
             <span className="live-tag">
               <i />
               LIVE
             </span>
           </div>
-          <PunchCard compact />
+          {user.isSuperAdmin ? (
+            <div className="page-actions">
+              <p>
+                Full company access. Manage people, roles, payroll and company
+                settings.
+              </p>
+              <button onClick={() => navigate("/audit")}>Audit history</button>
+              <button onClick={() => navigate("/settings")}>
+                Company settings
+              </button>
+            </div>
+          ) : (
+            <PunchCard compact />
+          )}
         </section>
       </div>
       <Suspense fallback={<Loading />}>
