@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+coverage/
+*.log
+
+backend/storage/
+playwright-report/
+test-results/
+*.abco
+backups/
